@@ -1,0 +1,10 @@
+{
+    "$schema": "https://json.schemastore.org/block.json",
+    "apiVersion": 2,
+    "name": "test/test",
+    "title": "Test Block",
+    "textdomain": "gutenberg-test",
+    "icon": "universal-access-alt",
+    "category": "layout",
+    "example": {}
+}

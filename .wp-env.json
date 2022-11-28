@@ -1,0 +1,11 @@
+{
+    "plugins": [
+        "WordPress/gutenberg",
+        "."
+    ],
+    "phpVersion": "8.1",
+    "config": {
+        "WP_DEBUG_DISPLAY": false,
+        "WP_DEBUG": true
+    }
+}

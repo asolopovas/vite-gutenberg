@@ -1,0 +1,19 @@
+{
+    "name": "andrius/lyn-blocks",
+    "autoload": {
+        "psr-4": {
+            "Lyntouch\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "andrius",
+            "email": "andrius.solopovas@gmail.com"
+        }
+    ],
+    "require": {
+        "symfony/var-dumper": "^6.1",
+        "spatie/ignition": "^1.4",
+        "symfony/dotenv": "^6.1"
+    }
+}
