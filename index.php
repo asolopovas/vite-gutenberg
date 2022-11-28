@@ -19,6 +19,8 @@ use Lyntouch\Vite;
 use Symfony\Component\Dotenv\Dotenv;
 
 defined('ABSPATH') || exit;
+define('VITGUT_BASE_PATH', plugin_dir_path(__FILE__));
+define('VITGUT_BASE_URL', plugin_dir_url(__FILE__));
 
 require_once(__DIR__ . '/src/helpers.php');
 require_once(__DIR__ . '/vendor/autoload.php');
@@ -26,6 +28,7 @@ require_once(__DIR__ . '/src/filters.php');
 
 $dotenv = new Dotenv();
 $dotenv->load(__DIR__ . '/.env');
+
 
 if (getenv('APP_ENV') == 'development') {
     add_action('init', function () {
@@ -65,11 +68,9 @@ add_action('init', 'initGutenbergVite');
 
 function loadEditorAssets()
 {
-    viteAssetsLoader(
-        (new Vite([
-            'src/blocks/test/index.js',
-        ]))->build()
-    );
+    (new Vite([
+        'src/blocks/test/index.js',
+    ]))->build()->load();
 }
 
 add_action('enqueue_block_editor_assets', 'loadEditorAssets');

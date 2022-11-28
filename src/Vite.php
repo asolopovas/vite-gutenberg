@@ -1,33 +1,31 @@
 <?php
 
-namespace Lyntouch;
+namespace Lyntouch\Lib;
 
 class Vite
 {
 
     private array $paths;
-    private string $manifestDirectory;
     private string $outputDir;
     private array $output = [];
     public bool $hot = false;
+    public string $pluginUrl;
+    public string $manifestDirectory;
 
     public function __construct(array $paths, string $manifestDirectory = "", string $outputDir = "")
     {
         $this->paths = $this->normalizePaths($paths);
-        $this->manifestDirectory = $this->resolveManifest($manifestDirectory);
-        $this->outputDir =  $this->resolveOutputDirectory($outputDir);
+        $this->manifestDirectory = $manifestDirectory ?? VITGUT_BASE_PATH . 'public';
+        $this->outputDir = $outputDir === ""
+            ? $this->getDefaultOutputDirectory()
+            : $outputDir;
     }
 
-    private function resolveManifest(string $manifestDirectory): string
-    {
-        return $manifestDirectory === "" ? plugin_dir_path(__DIR__) . "static" : $manifestDirectory;
-    }
-
-    private function resolveOutputDirectory(): string
+    private function getDefaultOutputDirectory(): string
     {
         return str_contains($this->manifestDirectory, 'themes')
-            ? parse_url(get_stylesheet_directory_uri(), PHP_URL_PATH) . 'static'
-            : parse_url(plugin_dir_url(realpath(__DIR__)), PHP_URL_PATH) . 'static';
+            ? parse_url(get_stylesheet_directory_uri(), PHP_URL_PATH) . 'build'
+            : parse_url(VITGUT_BASE_URL, PHP_URL_PATH) . 'public';
     }
 
     private function normalizePaths(array $paths): array
@@ -52,7 +50,17 @@ class Vite
         return json_decode($json, true);
     }
 
-    public function build(): array
+    public function loadStatic($assets)
+    {
+        $assets = $this->normalizePaths($assets);
+        foreach ($assets as $asset) {
+            $file = new \SplFileInfo($asset);
+            $this->output[$file->getFilename()] = VITGUT_BASE_URL .  $asset;
+        }
+        return $this;
+    }
+
+    public function build(): Vite
     {
         $devHost = $this->getDevHost();
 
@@ -61,19 +69,38 @@ class Vite
             foreach ($this->paths as $path) {
                 $this->output[$path] = $devHost . "/$path";
             }
-
-            return $this->output;
+            return $this;
         }
 
         $manifestAssets = $this->parseManifest();
 
         foreach ($manifestAssets as $key => $asset) {
-            $host = getenv("APP_URL");
+            $host = env("APP_URL");
             $asset = $manifestAssets[$key]['file'];
-            $this->output[$key] = $host . $this->outputDir . '/' . $asset;
+
+            if (str_contains ($key, '_index')) {
+                $this->output[$key] = $host . $this->outputDir . '/' . $asset;
+            }
+
+            if (in_array($key, $this->paths)) {
+                $this->output[$key] = $host . $this->outputDir . '/' . $asset;
+            }
         }
 
-        return $this->output;
+        return $this;
+    }
+
+    public function load()
+    {
+        foreach ($this->output as $key => $asset) {
+            $pathInfo = pathinfo($asset);
+            $ext = $pathInfo['extension'] ?? '';
+
+            match ($ext) {
+                'css' => wp_enqueue_style($key, $asset, [], null),
+                default => wp_enqueue_script($key, $asset . "#module", [], null)
+            };
+        }
     }
 
     public function get($key)
