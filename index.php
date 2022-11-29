@@ -68,9 +68,12 @@ add_action('init', 'initGutenbergVite');
 
 function loadEditorAssets()
 {
-    (new Vite([
-        'src/blocks/test/index.js',
-    ]))->build()->load();
+    $assets = new Vite([
+        'src/blocks/test/index.jsx',
+    ]);
+    $assets->build()->load();
 }
 
-add_action('enqueue_block_editor_assets', 'loadEditorAssets');
+// add_action('enqueue_block_editor_assets', 'loadEditorAssets');
+add_action('wp_enqueue_scripts', 'loadEditorAssets');
+add_action('admin_enqueue_scripts', 'loadEditorAssets');

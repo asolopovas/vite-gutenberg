@@ -1,13 +1,13 @@
 <?php
 
-namespace Lyntouch\Lib;
+namespace Lyntouch;
 
 class Vite
 {
 
     private array $paths;
     private string $outputDir;
-    private array $output = [];
+    public array $output = [];
     public bool $hot = false;
     public string $pluginUrl;
     public string $manifestDirectory;
@@ -15,7 +15,7 @@ class Vite
     public function __construct(array $paths, string $manifestDirectory = "", string $outputDir = "")
     {
         $this->paths = $this->normalizePaths($paths);
-        $this->manifestDirectory = $manifestDirectory ?? VITGUT_BASE_PATH . 'public';
+        $this->manifestDirectory = $manifestDirectory ? $manifestDirectory : VITGUT_BASE_PATH . 'static';
         $this->outputDir = $outputDir === ""
             ? $this->getDefaultOutputDirectory()
             : $outputDir;
@@ -25,7 +25,7 @@ class Vite
     {
         return str_contains($this->manifestDirectory, 'themes')
             ? parse_url(get_stylesheet_directory_uri(), PHP_URL_PATH) . 'build'
-            : parse_url(VITGUT_BASE_URL, PHP_URL_PATH) . 'public';
+            : parse_url(VITGUT_BASE_URL, PHP_URL_PATH) . 'static';
     }
 
     private function normalizePaths(array $paths): array
